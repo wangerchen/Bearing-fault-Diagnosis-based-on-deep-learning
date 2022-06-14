@@ -121,7 +121,7 @@ model.compile(
     metrics=['accuracy'])
 
 history = model.fit(x_train, y_train,
-                    batch_size=256, epochs=50, verbose=1,
+                    batch_size=256, epochs=200, verbose=1,
                     validation_data=(x_valid, y_valid),
                     callbacks=[CustomModelCheckpoint(
   model, r'best_cwt_picture_cnn.h5')])
@@ -170,7 +170,7 @@ first_layer_activation = activations[0]
 print(first_layer_activation.shape)
 
 fig, ax = plt.subplots(1, 8, figsize=(12, 16))
-ax[0].matshow(first_layer_activation[0, :, :, 0])
+ax[0].matshow(first_layer_activation[0, :, :, 0], cmap="viridis")
 ax[1].matshow(first_layer_activation[0, :, :, 1], cmap="viridis")
 ax[2].matshow(first_layer_activation[0, :, :, 2], cmap="viridis")
 ax[3].matshow(first_layer_activation[0, :, :, 3], cmap="viridis")

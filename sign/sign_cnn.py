@@ -114,7 +114,7 @@ class CustomModelCheckpoint(keras.callbacks.Callback):
 # t-sne初始可视化函数
 def start_tsne():
     print("正在进行初始输入数据的可视化...")
-    x_train1 = tf.reshape(x_train, (len(x_train), 52*52))
+    x_train1 = tf.reshape(x_train, (len(x_train), 784))
     X_tsne = TSNE().fit_transform(x_train1)
     plt.figure(figsize=(10, 10))
     plt.scatter(X_tsne[:, 0], X_tsne[:, 1], c=y_train)
