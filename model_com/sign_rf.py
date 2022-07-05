@@ -7,9 +7,13 @@
 # 该项目对应的视频可在B站搜索《秋雨行舟》进行观看学习。
 # 欢迎交流学习，共同进步
 from time import sleep
+
+from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score, ShuffleSplit
 from tensorflow import keras
 from sign import preprocess
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, classification_report
 import matplotlib.pyplot as plt
 import random
 import tensorflow.keras as keras
@@ -119,109 +123,30 @@ def start_tsne():
     plt.colorbar()
     plt.show()
 
-start_tsne()
-sleep(600000)
+# start_tsne()
+# sleep(600000)
+len_x_train = len(x_train)
+len_x_test = len(x_test)
 
-# 模型定义
-def mymodel():
-    inputs = keras.Input(shape=(x_train.shape[1], x_train.shape[2]))
-    h1 = layers.Conv1D(filters=8, kernel_size=3, strides=1, padding='same', activation='relu')(inputs)
-    h1 = layers.MaxPool1D(pool_size=2, strides=2, padding='same')(h1)
-
-    h1 = layers.Conv1D(filters=16, kernel_size=3, strides=1, padding='same', activation='relu')(h1)
-    h1 = layers.MaxPool1D(pool_size=2, strides=2, padding='same')(h1)
-
-    h1 = layers.Flatten()(h1)
-    h1 = layers.Dropout(0.6)(h1)
-    h1 = layers.Dense(32, activation='relu')(h1)
-    h1 = layers.Dense(10, activation='softmax')(h1)
-
-    deep_model = keras.Model(inputs, h1, name="cnn")
-    return deep_model
-
-model = mymodel()
-
-model.summary()
-startdate = datetime.utcnow()  # 获取当前时间
-
-# 编译模型
-model.compile(
-    optimizer=keras.optimizers.Adam(),
-    loss='sparse_categorical_crossentropy',
-    metrics=['accuracy'])
-
-history = model.fit(x_train, y_train,
-                    batch_size=256, epochs=50, verbose=1,
-                    validation_data=(x_valid, y_valid),
-                    callbacks=[CustomModelCheckpoint(
-  model, r'best_sign_cnn.h5')])
-
-#加载模型
-# filepath = r'best_sign_cnn.h5'
-model.load_weights(filepath='best_sign_cnn.h5')
-# 编译模型
-model.compile(loss='sparse_categorical_crossentropy', optimizer=keras.optimizers.Adam(), metrics=['accuracy'])
-# 评估模型
-scores = model.evaluate(x_test, y_test, verbose=1)
-print('%s: %.2f%%' % (model.metrics_names[1], scores[1] * 100))
-
-y_predict = model.predict(x_test)
-y_pred_int = np.argmax(y_predict, axis=1)
-print(y_pred_int[0:5])
-from sklearn.metrics import classification_report
-print(classification_report(y_test, y_pred_int, digits=4))
-
-def acc_line():
-    # 绘制acc和loss曲线
-    acc = history.history['accuracy']
-    val_acc = history.history['val_accuracy']
-    loss = history.history['loss']
-    val_loss = history.history['val_loss']
-
-    epochs = range(len(acc))  # Get number of epochs
-
-    # 画accuracy曲线
-    plt.plot(epochs, acc, 'r', linestyle='-.')
-    plt.plot(epochs, val_acc, 'b', linestyle='dashdot')
-    plt.title('Training and validation accuracy')
-    plt.xlabel("Epochs")
-    plt.ylabel("Accuracy")
-    plt.legend(["Accuracy", "Validation Accuracy"])
-
-    plt.figure()
-
-    # 画loss曲线
-    plt.plot(epochs, loss, 'r', linestyle='-.')
-    plt.plot(epochs, val_loss, 'b', linestyle='dashdot')
-    plt.title('Training and validation loss')
-    plt.xlabel("Epochs")
-    plt.ylabel("Loss")
-    plt.legend(["Loss", "Validation Loss"])
-    # plt.figure()
-    plt.show()
+x_train = tf.reshape(x_train, (len_x_train, 784))
+x_test = tf.reshape(x_test, (len_x_test, 784))
 
 
-acc_line()
+x_train = np.array(x_train)
+y_train = np.array(y_train)
+x_test = np.array(x_test)
+y_test = np.array(y_test)
 
+# ======================================================================
+# 模型训练
+rfc_model = RandomForestClassifier(n_jobs=-1)
+cv_split = ShuffleSplit(n_splits=5)
+score_ndarray = cross_val_score(rfc_model, x_train, y_train, cv=cv_split)
+print(score_ndarray.round(4))
+print(score_ndarray.mean().round(4))
 
-# 绘制混淆矩阵
-def confusion():
-    y_pred_gailv = model.predict(x_test, verbose=1)
-    y_pred_int = np.argmax(y_pred_gailv, axis=1)
-    print(len(y_pred_int))
-    con_mat = confusion_matrix(y_test.astype(str), y_pred_int.astype(str))
-    print(con_mat)
-    classes = list(set(y_train))
-    classes.sort()
-    plt.imshow(con_mat, cmap=plt.cm.Blues)
-    indices = range(len(con_mat))
-    plt.xticks(indices, classes)
-    plt.yticks(indices, classes)
-    plt.colorbar()
-    plt.xlabel('guess')
-    plt.ylabel('true')
-    for first_index in range(len(con_mat)):
-        for second_index in range(len(con_mat[first_index])):
-            plt.text(first_index, second_index, con_mat[second_index][first_index], va='center', ha='center')
-    plt.show()
-confusion()
+# 模型测试
+random_tree_model = RandomForestClassifier(n_jobs=-1)
+random_tree_model.fit(x_train, y_train)
+print("测试集准确率为： ", random_tree_model.score(x_test, y_test).round(4))
+
