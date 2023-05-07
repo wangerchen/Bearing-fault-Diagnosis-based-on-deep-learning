@@ -106,3 +106,7 @@ def prepro(d_path, length=0, number=0, normal=True, rate=[0, 0, 0], enc=False, e
     Valid_X, Valid_Y, Test_X, Test_Y = valid_test_slice(Test_X, Test_Y)
     return Train_X, Train_Y, Valid_X, Valid_Y, Test_X, Test_Y
 
+
+
+
+# 

@@ -122,6 +122,12 @@ def start_tsne():
 # start_tsne()
 # sleep(600000)
 
+
+# (100, 784, 1) = (100, 23, 23, 1)
+# 1,1,,1,1,1,,1,1,1,,1,1,,1,2,,2,3,,4,,,5,,,6,6,,6,,7,7,7,7,7,7,8,,8,9,9,
+
+
+
 # 模型定义
 def mymodel():
     inputs = keras.Input(shape=(x_train.shape[1], x_train.shape[2]))
@@ -130,9 +136,9 @@ def mymodel():
 
     h1 = layers.Conv1D(filters=16, kernel_size=3, strides=1, padding='same', activation='relu')(h1)
     h1 = layers.MaxPool1D(pool_size=2, strides=2, padding='same')(h1)
-
-    h1 = layers.Flatten()(h1)
     h1 = layers.Dropout(0.6)(h1)
+    h1 = layers.Flatten()(h1)
+
     h1 = layers.Dense(32, activation='relu')(h1)
     h1 = layers.Dense(10, activation='softmax')(h1)
 
