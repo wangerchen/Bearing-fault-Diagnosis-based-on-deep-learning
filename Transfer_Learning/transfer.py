@@ -158,25 +158,18 @@ predictions = Dense(10, activation='softmax')(x)
 # 定义新的模型
 model_new = Model(inputs=inputs, outputs=predictions)
 
-transfer = model.predict(x_train)
+transfer = model.predict(x_test)
 print("transfer", transfer.shape)
-print("x_train", x_train.shape)
+print("x_test", x_test.shape)
 # 训练新的模型
 model_new.compile(optimizer='adam',
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
-model_new.fit(transfer, y_train, epochs=50, batch_size=64)
-
-# 加载新的测试数据
-x_test = x_test
+model_new.fit(transfer, y_test, epochs=50, batch_size=64)
 
 # 把之前的model的输出作为新模型的输入
 transfer_test = model.predict(x_test)
 # 在测试数据上评估新的模型
-model_new.evaluate(transfer_test, y_test, batch_size=32)
-# 编译模型
-model_new.compile(loss='sparse_categorical_crossentropy', optimizer=keras.optimizers.Adam(), metrics=['accuracy'])
-# 评估模型
-scores = model_new.evaluate(transfer_test, y_test, verbose=1)
+scores = model_new.evaluate(transfer_test, y_test)
 print("result")
 print('%s: %.2f%%' % (model_new.metrics_names[1], scores[1] * 100))
